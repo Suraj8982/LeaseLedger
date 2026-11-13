@@ -56,7 +56,7 @@ class AuthFlowTest {
                 .andExpect(jsonPath("$.accessToken", not(emptyString())))
                 .andExpect(jsonPath("$.role").value("MANAGER"));
 
-        mvc.perform(get("/api/me").header("Authorization", "Bearer " + tokenFrom(registered)))
+        mvc.perform(get("/api/users/me").header("Authorization", "Bearer " + tokenFrom(registered)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("manager@example.com"))
                 .andExpect(jsonPath("$.role").value("MANAGER"))
@@ -65,12 +65,12 @@ class AuthFlowTest {
 
     @Test
     void protectedEndpointWithoutTokenIs401() throws Exception {
-        mvc.perform(get("/api/me")).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/users/me")).andExpect(status().isUnauthorized());
     }
 
     @Test
     void protectedEndpointWithGarbageTokenIs401() throws Exception {
-        mvc.perform(get("/api/me").header("Authorization", "Bearer not-a-real-token"))
+        mvc.perform(get("/api/users/me").header("Authorization", "Bearer not-a-real-token"))
                 .andExpect(status().isUnauthorized());
     }
 

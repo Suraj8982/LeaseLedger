@@ -10,7 +10,7 @@ A Spring Boot API where a person can register as a manager or tenant, log in, re
 |---|---|---|
 | `POST /api/auth/register` | Anyone | Creates an account, returns a token (201) |
 | `POST /api/auth/login` | Anyone | Checks the password, returns a token (200) |
-| `GET /api/me` | Logged-in users | Returns the caller's own profile |
+| `GET /api/users/me` | Logged-in users | Returns the caller's own profile |
 | `GET /actuator/health` | Anyone | Says whether the app is up (used later by AWS) |
 
 ## Package layout
@@ -20,7 +20,7 @@ Packages are grouped by feature, not by layer. Everything about login is in `aut
 ```
 com.leaseledger
 ├── auth      AuthController, AuthService, request/response records
-├── user      User entity, Role enum, UserRepository, MeController
+├── user      User entity, Role enum, UserRepository, UserController
 ├── security  JwtService, JwtAuthFilter, AuthenticatedUser
 ├── config    SecurityConfig
 └── common    ApiExceptionHandler
@@ -38,13 +38,13 @@ Why by feature: when you change how leases work you touch one package. With `con
 4. `AuthService.login` lowercases the email, loads the user, and asks BCrypt whether the password matches the stored hash.
 5. On a match, `JwtService.issue` builds a token containing the user id and role, signs it, and it is returned.
 
-### A protected call: `GET /api/me` with `Authorization: Bearer <token>`
+### A protected call: `GET /api/users/me` with `Authorization: Bearer <token>`
 
 1. `JwtAuthFilter` takes the token from the header and calls `JwtService.verify`.
 2. `verify` recomputes the signature with the server's secret and checks the expiry. If either is wrong it throws.
 3. On success the filter puts an `AuthenticatedUser(id, role)` into the `SecurityContext`. From here on, Spring knows who the caller is.
 4. `SecurityConfig` says every other URL needs authentication. The context is filled, so the request passes.
-5. `MeController` receives the caller through `@AuthenticationPrincipal` and loads their profile.
+5. `UserController` receives the caller through `@AuthenticationPrincipal` and loads their profile.
 
 Without a token, or with a bad one, step 3 never happens, step 4 fails, and the response is 401.
 
@@ -92,7 +92,7 @@ Hibernate can create tables from entities, but then nobody controls or reviews w
 
 ### Why DTO records instead of returning the entity
 
-Returning `User` as JSON would include `passwordHash`. Separate records (`RegisterRequest`, `AuthResponse`, `MeResponse`) mean the API shape is chosen deliberately and can change independently of the table. The test asserts `passwordHash` is absent from `/api/me`.
+Returning `User` as JSON would include `passwordHash`. Separate records (`RegisterRequest`, `AuthResponse`, `UserResponse`) mean the API shape is chosen deliberately and can change independently of the table. The test asserts `passwordHash` is absent from `/api/users/me`.
 
 ### Why `JwtAuthFilter` is not a `@Component`
 

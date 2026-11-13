@@ -35,7 +35,7 @@ Then:
 curl -X POST localhost:8080/api/auth/register -H "Content-Type: application/json" -d '{"email":"manager@example.com","password":"correct-horse","fullName":"Demo Manager","role":"MANAGER"}'
 ```
 
-Use the returned `accessToken` as `Authorization: Bearer <token>` on `GET /api/me`.
+Use the returned `accessToken` as `Authorization: Bearer <token>` on `GET /api/users/me`.
 
 To run against PostgreSQL instead, start `docker compose up -d`, set `LEASELEDGER_JWT_SECRET` to a Base64 key of at least 32 bytes, and run without the `local` profile.
 
