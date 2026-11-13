@@ -2,7 +2,7 @@
 
 A rent and property management platform. Property managers list units, create leases and track rent; tenants see what they owe and raise maintenance requests.
 
-**Status: in progress.** Milestone 1 of phase 1 is done. This README is updated as each milestone lands.
+**Status: in progress.** Milestones 1 and 2 of phase 1 are done. This README is updated as each milestone lands.
 
 ## Stack
 
@@ -11,7 +11,7 @@ Java 17, Spring Boot 3, Spring Security (JWT), Spring Data JPA, Flyway, PostgreS
 ## Roadmap (phase 1)
 
 - [x] 1. Project foundation, users, roles and JWT login
-- [ ] 2. Properties and units
+- [x] 2. Properties and units
 - [ ] 3. Leases, rent schedules and invoices
 - [ ] 4. Maintenance requests with photo upload (S3)
 - [ ] 5. Rent reminders (SQS worker, email)
