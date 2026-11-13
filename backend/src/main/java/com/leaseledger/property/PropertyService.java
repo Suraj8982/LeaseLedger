@@ -3,10 +3,10 @@ package com.leaseledger.property;
 import com.leaseledger.common.ConflictException;
 import com.leaseledger.common.NotFoundException;
 import com.leaseledger.common.PageResponse;
+import com.leaseledger.common.Paging;
 import com.leaseledger.property.PropertyDtos.PropertyRequest;
 import com.leaseledger.property.PropertyDtos.PropertyResponse;
 import com.leaseledger.property.PropertyDtos.PropertySummary;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,8 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class PropertyService {
-
-    private static final int MAX_PAGE_SIZE = 100;
 
     private final PropertyRepository properties;
     private final UnitRepository units;
@@ -36,9 +34,7 @@ public class PropertyService {
 
     @Transactional(readOnly = true)
     public PageResponse<PropertySummary> list(Long managerId, int page, int size) {
-        // Clamp instead of trusting the client: ?size=1000000 must not load a million rows.
-        var pageable = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), MAX_PAGE_SIZE));
-        return PageResponse.from(properties.findSummariesByManagerId(managerId, pageable));
+        return PageResponse.from(properties.findSummariesByManagerId(managerId, Paging.of(page, size)));
     }
 
     @Transactional(readOnly = true)

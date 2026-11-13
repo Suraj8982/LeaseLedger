@@ -51,7 +51,27 @@ public class UnitService {
         if (unit.getStatus() == UnitStatus.OCCUPIED) {
             throw new ConflictException("An occupied unit cannot be deleted");
         }
-        units.delete(unit);
+        try {
+            units.delete(unit);
+            units.flush();
+        } catch (DataIntegrityViolationException e) {
+            // A past lease still points at this unit (foreign key). Its history must survive.
+            throw new ConflictException("A unit with lease history cannot be deleted");
+        }
+    }
+
+    /**
+     * For the lease module: returns the unit, locked, only if the caller manages it and
+     * it is vacant. Must be called inside the transaction that then creates the lease.
+     */
+    public Unit lockVacantUnit(Long managerId, Long unitId) {
+        Unit unit = units.findByIdForUpdate(unitId)
+                .filter(u -> u.getProperty().getManagerId().equals(managerId))
+                .orElseThrow(() -> new NotFoundException("Unit not found"));
+        if (unit.getStatus() != UnitStatus.VACANT) {
+            throw new ConflictException("This unit is not vacant");
+        }
+        return unit;
     }
 
     private Unit requireUnit(Long managerId, Long propertyId, Long unitId) {

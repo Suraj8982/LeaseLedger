@@ -17,6 +17,8 @@ spring:
       enabled: true
 
 leaseledger:
+  # Business time zone: decides what "today" is for due dates and overdue checks.
+  time-zone: ${LEASELEDGER_TIME_ZONE:Asia/Dubai}
   jwt:
     # Base64-encoded key of at least 32 bytes. No default here on purpose:
     # the app must fail to start rather than run with a guessable secret.

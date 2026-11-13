@@ -65,6 +65,16 @@ public class Unit {
         this.status = status;
     }
 
+    /** Called by the lease module when a lease starts. */
+    public void occupy() {
+        this.status = UnitStatus.OCCUPIED;
+    }
+
+    /** Called by the lease module when a lease ends. */
+    public void vacate() {
+        this.status = UnitStatus.VACANT;
+    }
+
     public Long getId() {
         return id;
     }
