@@ -1,0 +1,30 @@
+# Default profile: PostgreSQL. Every environment-specific value comes from an
+# environment variable, so the same jar runs locally, in Docker and on AWS.
+spring:
+  application:
+    name: leaseledger
+  datasource:
+    url: ${LEASELEDGER_DB_URL:jdbc:postgresql://localhost:5432/leaseledger}
+    username: ${LEASELEDGER_DB_USER:leaseledger}
+    password: ${LEASELEDGER_DB_PASSWORD:leaseledger}
+  jpa:
+    open-in-view: false
+    hibernate:
+      # Flyway owns the schema. Hibernate only checks that entities match it.
+      ddl-auto: validate
+  mvc:
+    problemdetails:
+      enabled: true
+
+leaseledger:
+  jwt:
+    # Base64-encoded key of at least 32 bytes. No default here on purpose:
+    # the app must fail to start rather than run with a guessable secret.
+    secret: ${LEASELEDGER_JWT_SECRET}
+    ttl-minutes: 60
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

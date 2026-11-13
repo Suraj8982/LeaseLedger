@@ -1,0 +1,16 @@
+# Local PostgreSQL for the default profile. Requires Docker Desktop.
+#   docker compose up -d
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: leaseledger
+      POSTGRES_USER: leaseledger
+      POSTGRES_PASSWORD: leaseledger
+    ports:
+      - "5432:5432"
+    volumes:
+      - leaseledger-pgdata:/var/lib/postgresql/data
+
+volumes:
+  leaseledger-pgdata:

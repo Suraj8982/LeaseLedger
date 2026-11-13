@@ -1,0 +1,12 @@
+# "local" profile: in-memory H2 in PostgreSQL compatibility mode, so the app and
+# the tests run with no Docker and no installed database. Data is lost on restart.
+spring:
+  datasource:
+    url: jdbc:h2:mem:leaseledger;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
+    username: sa
+    password:
+
+leaseledger:
+  jwt:
+    # Development-only key. Never used outside the local profile.
+    secret: bG9jYWwtZGV2LW9ubHktc2VjcmV0LWRvLW5vdC11c2UtaW4tcHJvZHVjdGlvbg==
