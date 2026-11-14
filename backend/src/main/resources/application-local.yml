@@ -7,6 +7,9 @@ spring:
     password:
 
 leaseledger:
+  storage:
+    # The S3 emulator from docker-compose.yml. Only photo upload needs it to be running.
+    endpoint: http://localhost:4566
   jwt:
     # Development-only key. Never used outside the local profile.
     secret: bG9jYWwtZGV2LW9ubHktc2VjcmV0LWRvLW5vdC11c2UtaW4tcHJvZHVjdGlvbg==

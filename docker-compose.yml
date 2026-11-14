@@ -1,6 +1,18 @@
-# Local PostgreSQL for the default profile. Requires Docker Desktop.
+# Local stand-ins for the AWS services the app uses. Requires Docker.
 #   docker compose up -d
 services:
+  # Emulates AWS S3 on http://localhost:4566 so photo upload works with no AWS account.
+  # Pinned to a version that needs no sign-up or licence key.
+  localstack:
+    image: localstack/localstack:3.8.1
+    environment:
+      SERVICES: s3
+    ports:
+      - "4566:4566"
+    volumes:
+      # Scripts in this folder run once the emulator is ready: they create the bucket.
+      - ./localstack:/etc/localstack/init/ready.d
+
   postgres:
     image: postgres:16
     environment:
