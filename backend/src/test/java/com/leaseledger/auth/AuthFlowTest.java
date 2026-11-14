@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -49,16 +50,22 @@ class AuthFlowTest {
                 .get("accessToken").asText();
     }
 
+    /** A different address on every run, so the tests also pass against a database that keeps its data. */
+    private static String uniqueEmail() {
+        return UUID.randomUUID() + "@example.com";
+    }
+
     @Test
     void registerThenCallProtectedEndpointWithToken() throws Exception {
-        ResultActions registered = register("manager@example.com", "MANAGER")
+        String email = uniqueEmail();
+        ResultActions registered = register(email, "MANAGER")
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.accessToken", not(emptyString())))
                 .andExpect(jsonPath("$.role").value("MANAGER"));
 
         mvc.perform(get("/api/users/me").header("Authorization", "Bearer " + tokenFrom(registered)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.email").value("manager@example.com"))
+                .andExpect(jsonPath("$.email").value(email))
                 .andExpect(jsonPath("$.role").value("MANAGER"))
                 .andExpect(jsonPath("$.passwordHash").doesNotExist());
     }
@@ -76,35 +83,37 @@ class AuthFlowTest {
 
     @Test
     void sameEmailCannotRegisterTwiceEvenWithDifferentCase() throws Exception {
-        register("dup@example.com", "TENANT").andExpect(status().isCreated());
+        String email = uniqueEmail();
+        register(email, "TENANT").andExpect(status().isCreated());
 
-        register("DUP@example.com", "TENANT")
+        register(email.toUpperCase(), "TENANT")
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.detail").value("An account with this email already exists"));
     }
 
     @Test
     void loginSucceedsWithRightPasswordAndFailsWithWrongOne() throws Exception {
-        register("login@example.com", "TENANT").andExpect(status().isCreated());
+        String email = uniqueEmail();
+        register(email, "TENANT").andExpect(status().isCreated());
 
-        postJson("/api/auth/login", Map.of("email", "login@example.com", "password", "correct-horse"))
+        postJson("/api/auth/login", Map.of("email", email, "password", "correct-horse"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken", not(emptyString())));
 
-        postJson("/api/auth/login", Map.of("email", "login@example.com", "password", "wrong-password"))
+        postJson("/api/auth/login", Map.of("email", email, "password", "wrong-password"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     void unknownEmailGetsSameErrorAsWrongPassword() throws Exception {
-        postJson("/api/auth/login", Map.of("email", "nobody@example.com", "password", "whatever-123"))
+        postJson("/api/auth/login", Map.of("email", uniqueEmail(), "password", "whatever-123"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.detail").value("Invalid email or password"));
     }
 
     @Test
     void nobodyCanSelfRegisterAsAdmin() throws Exception {
-        register("sneaky@example.com", "ADMIN").andExpect(status().isBadRequest());
+        register(uniqueEmail(), "ADMIN").andExpect(status().isBadRequest());
     }
 
     @Test
