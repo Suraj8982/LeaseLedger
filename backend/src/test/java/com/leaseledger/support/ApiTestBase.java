@@ -10,6 +10,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -20,6 +21,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("local")
+@Import(FakeFileStorage.class)
 public abstract class ApiTestBase {
 
     @Autowired
@@ -27,6 +29,9 @@ public abstract class ApiTestBase {
 
     @Autowired
     protected ObjectMapper json;
+
+    @Autowired
+    protected FakeFileStorage storage;
 
     public record Account(String email, String token) {
     }
