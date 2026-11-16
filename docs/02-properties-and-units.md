@@ -1,6 +1,6 @@
 # Milestone 2: properties and units
 
-A manager can now record the buildings they manage and the rentable units inside each one. This milestone is mostly about two things interviewers care about: **who is allowed to touch which data**, and **how to query related data efficiently**.
+A manager can now record the buildings they manage and the rentable units inside each one. Two problems drive most of the design here: **who is allowed to touch which data**, and **how to query related data efficiently**.
 
 ## What exists after this milestone
 
@@ -116,21 +116,9 @@ Service classes are `@Transactional`: each public method runs in one database tr
 - **404**: the thing is not there, or not yours.
 - **409**: the request is fine but clashes with current data (duplicate unit number, deleting a property that has units).
 
-## Limits to state honestly
+## Known limitations
 
 - Still verified only on H2 in PostgreSQL mode, not real PostgreSQL.
 - No search or filtering on the property list yet.
 - No optimistic locking: if two browser tabs edit the same unit, the last save wins silently. `@Version` is the fix and is planned where it matters most, on invoices.
 - Deletes are permanent. Once leases exist, units with history should be archived instead.
-
-## Questions to practise answering aloud
-
-1. What is the difference between authentication and authorization? Where is each done in your code?
-2. Two managers exist. What stops one from reading the other's property by guessing the id?
-3. Why 404 instead of 403 there?
-4. What is the N+1 problem? Show me where you avoided it and what SQL runs.
-5. Why LEFT JOIN in that query? What breaks with an inner join?
-6. Why is `monthlyRent` a `BigDecimal`?
-7. `PropertyService.update` never calls `save`. How does the change reach the database?
-8. Why must a paginated query have a deterministic `ORDER BY`?
-9. Why is `Unit.property` lazy, and what is the default?

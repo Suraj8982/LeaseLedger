@@ -1,7 +1,5 @@
 # Milestone 1: project foundation, users and login
 
-Read this with the code open. After it you should be able to explain every file in `backend/` without notes.
-
 ## What exists after this milestone
 
 A Spring Boot API where a person can register as a manager or tenant, log in, receive a token, and use that token to call a protected endpoint.
@@ -107,19 +105,8 @@ Dependencies are `final` and visible in the constructor. A class cannot exist ha
 - `JwtServiceTest` is a **unit test**: one class, no Spring, a fixed clock so expiry can be tested without waiting. It runs in milliseconds.
 - `AuthFlowTest` is an **integration test**: it starts the whole application with an in-memory database and sends real HTTP requests through the security filters. It proves the pieces work together.
 
-## Limits you should state honestly if asked
+## Known limitations
 
 - Tests and the `local` profile use H2 in PostgreSQL mode, not real PostgreSQL. The default profile targets PostgreSQL, but it has not been run yet because Docker is not installed on this machine.
 - There is no refresh token, no logout, no rate limiting on login and no email verification yet.
 - Anyone can register as a manager. In a real product, managers would be approved or invited.
-
-## Questions to practise answering aloud
-
-1. Walk me through what happens when a request with a token hits your API.
-2. Someone steals a token. What can they do, and for how long? How would you reduce that?
-3. Can a tenant edit their token to become an admin? Why not?
-4. Why BCrypt and not SHA-256?
-5. Two people register with the same email at the same millisecond. What happens?
-6. Why did you disable CSRF? When would that be wrong?
-7. How does your schema get from your laptop to production?
-8. What is the difference between your two test classes, and why have both?

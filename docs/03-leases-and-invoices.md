@@ -1,6 +1,6 @@
 # Milestone 3: leases, rent schedules and invoices
 
-This is the core of the product. A manager leases a vacant unit to a tenant; the system works out the payment schedule and creates an invoice for each payment; payments are recorded against invoices; a lease can be ended early. It is also where the project's hardest engineering topics live: **transactions, concurrency, locking and money arithmetic**.
+This is the core of the product. A manager leases a vacant unit to a tenant; the system works out the payment schedule and creates an invoice for each payment; payments are recorded against invoices; a lease can be ended early. It is also where the hardest parts of the project are: **transactions, concurrency, locking and money arithmetic**.
 
 ## What exists after this milestone
 
@@ -56,7 +56,7 @@ This is a **check-then-act race**. Two requests can both do step 1 before either
 
 The fix is in `UnitRepository.findByIdForUpdate`, annotated `@Lock(PESSIMISTIC_WRITE)`. It makes Hibernate run `SELECT ... FOR UPDATE`, which locks the unit's row until the transaction ends. The second request's `SELECT` waits at that line. When the first transaction commits, the second one proceeds, reads the row as it is now (`OCCUPIED`), and returns 409.
 
-**This is proven, not assumed.** `LeaseConcurrencyTest` fires 8 lease requests for one unit at the same instant from 8 threads and asserts exactly one 201 and seven 409s. With the `@Lock` line removed, the same test fails with all 8 requests succeeding: 8 active leases on one apartment. That experiment was run while building this milestone.
+**This is proven, not assumed.** `LeaseConcurrencyTest` fires 8 lease requests for one unit at the same instant from 8 threads and asserts exactly one 201 and seven 409s. With the `@Lock` line removed, the same test fails with all 8 requests succeeding: 8 active leases on one apartment. I ran that experiment before committing the lock.
 
 ## Paying an invoice twice: optimistic locking
 
@@ -118,23 +118,10 @@ The invoice list varies by who is asking (manager or tenant) and by filter (five
 - The unit becomes `VACANT` and can be leased again.
 - A unit that has ever had a lease cannot be deleted (409); the foreign key protects the history.
 
-## Limits to state honestly
+## Known limitations
 
 - A lease that reaches its end date is not closed automatically, so its unit stays occupied. That needs a scheduled job, planned with the reminder worker in milestone 5.
 - Paying is manual (`mark-paid`). There are no partial payments and no way to undo a payment recorded by mistake. Phase 2 adds card payments.
 - Terminating does not handle the security deposit refund or pro-rata rent for a part-used period.
 - Overlapping future leases are not possible: a unit must be vacant now to be leased, even if the new lease would start after the current one ends.
 - The locking has been exercised on H2 only. `SELECT ... FOR UPDATE` is standard and behaves the same way on PostgreSQL, but that has not been run here yet.
-
-## Questions to practise answering aloud
-
-1. Creating a lease writes to three tables. What happens if the last insert fails?
-2. Two managers' browsers submit a lease for the same unit in the same millisecond. Walk me through what happens.
-3. How do you know that works? (Describe the test and what happened when you removed the lock.)
-4. What is the difference between pessimistic and optimistic locking? Where do you use each, and why?
-5. What SQL does `@Version` produce, and what happens to the loser?
-6. Rent of 100,000 in 6 installments. What are the amounts, and why not round each to the nearest fil?
-7. Why is there no `OVERDUE` status in your database?
-8. Why do you inject a `Clock` instead of calling `LocalDate.now()`?
-9. Why is `total_rent` on the lease when the unit already has a monthly rent?
-10. Why would this be harder with a separate billing microservice?

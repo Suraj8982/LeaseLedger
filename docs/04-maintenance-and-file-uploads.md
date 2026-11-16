@@ -96,13 +96,13 @@ Until now everything ran on H2, an in-memory database in PostgreSQL-compatibilit
 - **A test weakness.** Three login tests used fixed email addresses. They passed on H2, which starts empty every time, and failed on the second run against a database that keeps its data. They now use unique addresses.
 - **Confirmation.** The row lock, the 8-thread concurrency test, the optimistic version check, the grouped query and all migrations behave the same on PostgreSQL.
 
-The lesson to state in an interview: an in-memory substitute is convenient but is not the real database, and the differences show up exactly where you are not looking.
+The lesson: an in-memory substitute is convenient but is not the real database, and the differences show up exactly where you are not looking.
 
 ## Running it locally
 
 `docker compose up -d` now starts two containers: PostgreSQL and LocalStack. LocalStack listens on `http://localhost:4566`, and its startup script creates the bucket. The `local` profile points the app at it.
 
-## Limits to state honestly
+## Known limitations
 
 - **Never run against real AWS.** All S3 behaviour is verified against the emulator only.
 - **Bucket privacy is not verified.** The emulator serves unsigned requests, so "objects cannot be read without a signed URL" can only be confirmed on a real private bucket.
@@ -110,17 +110,3 @@ The lesson to state in an interview: an in-memory substitute is convenient but i
 - **Abandoned uploads are not cleaned up.** A file uploaded but never attached stays in the bucket. The standard fix is an S3 lifecycle rule that expires unattached objects.
 - **Photos cannot be removed** once attached, and there is no virus scanning.
 - **The tenant is not notified** when the status changes. That is milestone 5.
-
-## Questions to practise answering aloud
-
-1. How does a photo get from the user's phone into S3 in your system? Why not through your API?
-2. What exactly is a presigned URL? What can someone do with one, and for how long?
-3. The client tells you "I uploaded the file". Why don't you believe it, and what do you check?
-4. How do you limit upload size if the file never touches your server?
-5. Who chooses the S3 object key, and why does that matter?
-6. Where are your AWS access keys? (Answer: nowhere; explain IAM roles.)
-7. Why is there a `FileStorage` interface? How do you test code that talks to S3?
-8. What is Testcontainers, and what does it give you that a fake does not?
-9. How do you stop a request going from `RESOLVED` back to `OPEN`?
-10. A tenant tries to mark their request resolved. A tenant tries to cancel a request already in progress. What status code for each, and why are they different?
-11. Your tests passed on H2. What went wrong when you first ran on PostgreSQL?
