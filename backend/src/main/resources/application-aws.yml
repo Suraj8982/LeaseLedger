@@ -1,0 +1,11 @@
+# "aws" profile: use real AWS S3 instead of the local emulator.
+# Combine it with another profile, listing it last so it wins, for example: local,aws
+#
+# Requires:
+#   LEASELEDGER_S3_BUCKET  the name of your bucket
+#   AWS_REGION             the bucket's region, for example ap-south-1
+#   AWS credentials from the default chain (an IAM role on EC2, or `aws configure` on a laptop)
+leaseledger:
+  storage:
+    # Blank endpoint = the SDK talks to real AWS.
+    endpoint: ""
